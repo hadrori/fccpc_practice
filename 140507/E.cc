@@ -1,0 +1,63 @@
+#include <algorithm>
+#include <bitset>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
+
+#define repi(i,a,b) for(int i=(a);i<(b);i++)
+#define rep(i,a) repi(i,0,a)
+#define repd(i,a,b) for(int i=(a);i>=(b);i--)
+#define repit(i,a) for(__typeof((a).begin()) i=(a).begin();i!=(a).end();i++)
+
+#define all(u) (u).begin(),(u).end()
+#define rall(u) (u).rbegin(),(u).rend()
+#define UNIQUE(u) (u).erase(unique(all(u)),(u).end())
+
+#define pb push_back
+#define mp make_pair
+#define INF 1e9
+#define EPS 1e-9
+#define PI acos(-1.0)
+
+using namespace std;
+
+typedef long long ll;
+typedef vector<int> vi;
+
+ll G, T, A, D, X, Y;
+ll seq[60];
+
+void init(){
+    X = Y = 0;
+}
+
+bool input(){
+    cin >> G >> T >> A >> D;
+    if(G < 0) return 0;
+    return 1;
+}
+
+void solve(){
+    init();
+    ll gx = G*T*(T-1LL)/2LL;
+    ll kt = A*G+D;
+    ll lb = *lower_bound(seq, seq+60, kt);
+    Y = lb - kt;
+    X = lb-1LL+gx;
+    printf("%lld*%lld/%lld+%lld=%lld+%lld\n", G,A,T,D,X,Y);
+}
+
+int main()
+{
+    rep(i,60) seq[i] = 1LL << i;
+    while(input()) solve();
+    return 0;
+}
