@@ -31,31 +31,10 @@ using namespace std;
 typedef long long ll;
 
 ll q;
-/*
-ll f(ll n, ll m)
-{
-    ll a = n, b = n + 1;
-    if (a % 2 == 0) a >>= 1;
-    else b >>= 1;
 
-    ll ret = 0;
-    do {
-        if (b & 1) (ret += a) %= m;
-        (a += a) %= m;
-    } while (b >>= 1);
-    return ret;
-}
-
-int attempt(ll p)
-{
-    ll diff = (f(p + q, p - q) - 2 * f(p, p - q)) % (p - q);
-    if (diff == 0) cerr << p - q << ' ';
-    return diff == 0;
-}
-*/
 const int N = 10000000;
 
-bitset<N> c;
+char c[N] = {};
 int primes[N / 10] = {1, 1}, p_cnt = 0;
 
 void gen()
@@ -74,9 +53,58 @@ void gen()
     }
 }
 
+typedef ll Int;
+
+ll mmul(ll a, ll b, ll mod)
+{
+    ll ret = 0;
+    do {
+        if (b & 1) {
+            ret += a;
+            if (ret >= mod) ret -= mod;
+        }
+        a += a;
+        if (a >= mod) a -= mod;
+    } while (b >>= 1);
+    return ret;
+}
+
+ll powMod(ll a, ll b, ll mod)
+{
+    ll ret = 1;
+    do {
+        if (b & 1) ret = mmul(ret, a, mod);
+        a = mmul(a, a, mod);
+    } while (b >>= 1);
+    return ret;
+}
+
+bool suspect(Int a, int s, Int d, Int n) {
+    Int x = powMod(a, d, n);
+    if (x == 1) return true;
+    for (int r = 0; r < s; ++r) {
+        if (x == n - 1) return true;
+        x = mmul(x, x, n);
+    }
+    return false;
+}
+// {2,7,61,-1}                 is for n < 4759123141 (= 2^32)
+// {2,3,5,7,11,13,17,19,23,-1} is for n < 10^16 (at least)
+bool isPrime(Int n) {
+    if (n <= 1 || (n > 2 && n % 2 == 0)) return false;
+    int test[] = {2,3,5,7,11,13,17,19,23,-1};
+    Int d = n - 1, s = 0;
+    while (d % 2 == 0) ++s, d /= 2;
+    for (int i = 0; test[i] < n && test[i] != -1; ++i)
+        if (!suspect(test[i], s, d, n)) return false;
+    return true;
+}
+
 ll solve(ll n)
 {
     n /= (n & -n);
+
+    if (isPrime(n)) return 6;
 
     ll ans = 2;
     rep(i, p_cnt) {
