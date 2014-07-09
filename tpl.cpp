@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 #define rep(i,n) repi(i,0,n)
 #define repi(i,a,b) for(int i=(int)(a);i<(int)(b);++i)
 #define repd(i,a,b) for(int i=(int)(a);i>=(int)(b);--i)
@@ -25,8 +27,6 @@
 
 #define pb push_back
 #define mp make_pair
-
-using namespace std;
 
 typedef long long ll;
 
