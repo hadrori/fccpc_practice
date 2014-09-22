@@ -1,39 +1,17 @@
 #include <algorithm>
-#include <bitset>
-#include <cassert>
 #include <cctype>
-#include <cmath>
-#include <complex>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <map>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <vector>
 
 using namespace std;
 
 #define rep(i,n) repi(i,0,n)
 #define repi(i,a,b) for(int i=(int)(a);i<(int)(b);++i)
-#define repd(i,a,b) for(int i=(int)(a);i>=(int)(b);--i)
-#define repit(it,u) for(__typeof((u).begin()) it=(u).begin();it!=(u).end();++it)
 
-#define all(u) (u).begin(),(u).end()
-#define rall(u) (u).rbegin(),(u).rend()
-#define uniq(u) (u).erase(unique(all(u)),(u).end())
-
-#define pb push_back
-#define mp make_pair
-
-typedef long long ll;
-
-const int N = 1 << 19;
+const int N = 600010;
 
 int n, k;
-
 int rnk[N], tmp[N], sa[N], lcp[N];
 
 bool compare_sa(int i, int j)
@@ -78,22 +56,23 @@ void construct_lcp(char *S) {
 }
 
 int m;
-
 char combined[N];
 int x_ind[100010], y_ind[100010];
 
-int min_sa[20][N], max_sa[20][N], min_lcp[20][N];
+const int K = 20;
+
+int min_sa[K][N], max_sa[K][N];
 
 void construct_min_st(int (*st)[N], int* a)
 {
-    rep(i, 19) rep(j, n - (1 << i) + 1) {
+    rep(i, K - 1) rep(j, n - (1 << i) + 1) {
         st[i + 1][j] = min(st[i][j], st[i][j + (1 << i)]);
     }
 }
 
 void construct_max_st(int (*st)[N], int* a)
 {
-    rep(i, 19) rep(j, n - (1 << i) + 1) {
+    rep(i, K - 1) rep(j, n - (1 << i) + 1) {
         st[i + 1][j] = max(st[i][j], st[i][j + (1 << i)]);
     }
 }
@@ -105,44 +84,28 @@ int s_len;
 void prepare_st()
 {
     rep(i, n + 1) {
-        min_sa[0][i] = sa[i] < s_len ? sa[i] : inf;
+        // min_sa[0][i] = sa[i] < s_len ? sa[i] : inf;
         max_sa[0][i] = sa[i] < s_len ? sa[i] : -inf;
-        min_lcp[0][i] = lcp[i];
+        min_sa[0][i] = lcp[i];
     }
 }
 
 void input()
 {
     char *p = combined;
-    cin >> p, p += s_len = strlen(p);
+    scanf("%s", p), p += s_len = strlen(p);
     *p++ = '$';
-    cin >> m;
+    scanf("%d", &m);
     rep(i, m) {
         x_ind[i] = p - combined;
-        cin >> p, p += strlen(p);
+        scanf("%s", p), p += strlen(p);
         *p++ = ' ';
         y_ind[i] = p - combined;
-        cin >> p, p += strlen(p);
+        scanf("%s", p), p += strlen(p);
         *p++ = ' ';
     }
     *--p = '\0';
     n = p - combined;
-}
-
-void prepare()
-{
-    construct_sa(combined);
-    construct_lcp(combined);
-    prepare_st();
-    construct_min_st(min_sa, sa);
-    construct_max_st(max_sa, sa);
-    construct_min_st(min_lcp, lcp);
-    /*
-    cerr << n << ' ' << combined << endl;
-    rep(i, m) {
-        cerr << x_ind[i] << ' ' << y_ind[i] << endl;
-    }
-    */
 }
 
 int min_st(int (*st)[N], int l, int r)
@@ -157,9 +120,26 @@ int max_st(int (*st)[N], int l, int r)
     return max(st[sz][l], st[sz][r - (1 << sz)]);
 }
 
-int x_len, y_len;
+void prepare()
+{
+    construct_sa(combined);
+    construct_lcp(combined);
+    prepare_st();
+    // construct_min_st(min_sa, sa);
+    construct_max_st(max_sa, sa);
+    construct_min_st(min_sa, lcp);
+    /*
+    cerr << n << ' ' << combined << endl;
+    rep(i, m) {
+        cerr << x_ind[i] << ' ' << y_ind[i] << endl;
+    }
+    */
+}
 
-int find_min(int i)
+int x_len[100010], y_len[100010];
+int x_query[100010], y_query[100010];
+
+void find_min(int i)
 {
     const int id = rnk[x_ind[i]];
     {
@@ -167,22 +147,28 @@ int find_min(int i)
         while (pos < n and isalpha(combined[pos])) {
             ++pos;
         }
-        x_len = pos - x_ind[i];
+        x_len[i] = pos - x_ind[i];
     }
-    if (lcp[id] < x_len) return inf;
-    int l = id, r = n;
+    if (lcp[id] < x_len[i]) {
+        x_query[i] = -1;
+        return;
+    }
+    int l = id, r = n + 1;
     while (r - l > 1) {
         int m = (l + r) / 2;
-        if (min_st(min_lcp, l, m) >= x_len) {
+        if (min_st(min_sa, l, m) >= x_len[i]) {
             l = m;
         } else {
             r = m;
         }
     }
-    return min_st(min_sa, id, l + 1);
+    // return min_st(min_sa, id, l + 1);
+    x_query[i] = l + 1;
 }
 
-int find_max(int i)
+#define dump(x) (cerr<<#x<<" = "<<(x)<<endl)
+
+void find_max(int i)
 {
     const int id = rnk[y_ind[i]];
     {
@@ -190,32 +176,50 @@ int find_max(int i)
         while (pos < n and isalpha(combined[pos])) {
             ++pos;
         }
-        y_len = pos - y_ind[i];
+        y_len[i] = pos - y_ind[i];
     }
-    if (lcp[id] < y_len) return -inf;
-    int l = id, r = n;
+    if (lcp[id] < y_len[i]) {
+        y_query[i] = -1;
+        return;
+    }
+    int l = id, r = n + 1;
     while (r - l > 1) {
         int m = (l + r) / 2;
-        if (min_st(min_lcp, l, m) >= y_len) {
+        if (min_st(min_sa, l, m) >= y_len[i]) {
             l = m;
         } else {
             r = m;
         }
     }
-    return max_st(max_sa, id, l + 1);
+    // return max_st(max_sa, id, l + 1);
+    y_query[i] = l + 1;
 }
 
 void solve()
 {
     prepare();
     rep(i, m) {
+        /*
         const int mn = find_min(i);
         const int mx = find_max(i);
-        if (mn <= mx and mn + x_len <= mx + y_len) {
-            const int ans = mx + y_len - mn;
-            cout << ans << endl;
+        */
+        find_min(i);
+        find_max(i);
+    }
+    rep(i, n + 1) min_sa[0][i] = sa[i] < s_len ? sa[i] : inf;
+    construct_min_st(min_sa, sa);
+    rep(i, m) {
+        if (x_query[i] < 0 or y_query[i] < 0) {
+            puts("0");
+            continue;
+        }
+        const int mn = min_st(min_sa, rnk[x_ind[i]], x_query[i]);
+        const int mx = max_st(max_sa, rnk[y_ind[i]], y_query[i]);
+        if (mn <= mx and mn + x_len[i] <= mx + y_len[i]) {
+            const int ans = mx + y_len[i] - mn;
+            printf("%d\n", ans);
         } else {
-            cout << 0 << endl;
+            puts("0");
         }
     }
 }

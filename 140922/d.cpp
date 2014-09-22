@@ -29,23 +29,27 @@ using namespace std;
 #define mp make_pair
 
 typedef long long ll;
-
-int main()
+#define int ll
+signed main()
 {
     int N, P, Q;
     cin >> N >> P >> Q;
+    Q *= P;
     vector<int> C(N);
     rep(i, N) cin >> C[i];
     rep(i, N) C[i] = C[i] + P * i;
     sort(all(C));
     rep(i, N-1) C[i+1] += C[i];
     int ans = C[N-1] - N*(N-1)*P/2;
+    vector<int> D(N+1);
+    repi(M, 1, N+1) D[M] = M*(Q+Q+2*(M-1)*P)/2;
+    //rep(i, N) D[i+1] += D[i];
+
     repi(M, 1, N+1) {
-        cout << M << " " << M*(Q+(M-1)*P) + (C[N-1] - C[M-1]) - N*(N-1)*P/2 << endl;
-        ans = max(ans,
-                  M*(Q+(M-1)*P) + (C[N-1] - C[M-1]) - N*(N-1)*P/2);
+        //cout << M << " " << M*(Q+(M-1)*P) + (C[N-1] - C[M-1]) - N*(N-1)*P/2 << endl;
+        ans = max(ans, D[M] + (C[N-1] - C[M-1]) - N * (N-1) * P / 2);
     }
     cout << ans << endl;
-    
+
     return 0;
 }

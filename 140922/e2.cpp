@@ -34,19 +34,24 @@ const int di[] = {-1,0,1,0}, dj[] = {0,1,0,-1};
 const string ds = "NESW";
 
 char f[64][64];
-int h, w, pi, pj, cur, dir, ans, done[64][64][1024][4];
+int h, w, pi, pj, cur, dir, ans, done[64][64][1024][4], memo[1024];
 string s;
 
 void program();
 
 void to_end(char l, char r)
 {
-    int res = 1;
+    if(memo[cur] >= 0) {
+        cur = memo[cur];
+        return;
+    }
+    int res = 1, tmp = cur;
     while(res){
         if(s[cur] == l) res++;
         else if(s[cur] == r) res--;
         cur++;
     }
+    memo[tmp] = cur;
 }
 
 int cond()
@@ -56,13 +61,12 @@ int cond()
         ret = 1;
         cur++;
     }
-    char cd = ds[dir];
     if(s[cur] == 'T') ret ^= 1;
     else if(s[cur] == 'C') {
         int ni = pi+di[dir], nj = pj+dj[dir];
         if(f[ni][nj] == '#') ret ^= 1;
     }
-    else if(cd == s[cur]) ret ^= 1;
+    else if(ds[dir] == s[cur]) ret ^= 1;
     cur++;
     return ret;
 }
@@ -79,6 +83,8 @@ void whiles()
     cur++;
     int head = cur;
     while(cond()){
+        if(done[pi][pj][cur][dir]) throw -1;
+        done[pi][pj][cur][dir] = 1;
         program();
         cur = head;
     }
@@ -104,19 +110,17 @@ void move()
 
 void program()
 {
-    if(f[pi][pj] == 'g') throw ans;
-    if(done[pi][pj][cur][dir]) throw -1;
-    done[pi][pj][cur][dir] = 1;
-    cur++;
-    if(s[cur] == '[') ifs();
-    else if(s[cur] == '{') whiles();
-    else move();
-    cur++;
+    while(cur < (int)s.size() and s[cur] != ']' and s[cur] != '}') {
+        if(s[cur] == '[') ifs();
+        else if(s[cur] == '{') whiles();
+        else move();
+    }
 }
 
 int solve()
 {
     memset(done, 0, sizeof(done));
+    memset(memo,-1,sizeof(memo));
     try{
         program();
     }catch(int e){
