@@ -30,57 +30,68 @@ using namespace std;
 
 typedef long long ll;
 typedef complex<double> point;
-const int MAX = 128;
 int n;
-int d;
-double f;
 vector<point> p;
-double len[MAX];
-double slen[MAX];
-point sp;
-double sth;
+double r;
 
 point rotate(point a, double th) {
-    return point(a.real() * cos(th) - a.imag() * sin(th),
-                 a.real() * sin(th) + a.imag() * cos(th));
+    return a * polar(1.0, th);
 }
 
-point rec(int depth, double obj) {
-    if(depth == d) return point(obj, 0);
-    cout << "obj " << obj << endl;
-    rep(i, n-1) {
-        if(slen[i] > obj) {
-            cout << i << " " << obj << " " << slen[i] << endl;
-            return p[i] + rotate(rec(depth+1, (len[i]/slen[n-2]) * (obj - (i?slen[i-1]:0))),
-                              arg(p[i+1] - p[i]));
+point rec(vector<point> ps, double len, int d) {
+    double sum = 0.0;
+    if(d < 0) {
+        point dir = ps[n-1] - ps[0];
+        dir /= abs(dir);
+        return ps[0] + dir * len;
+    }
+    
+    rep(i, ps.size()-1) {
+        sum += abs(ps[i+1]-ps[i]) * pow(r, d);
+        if(sum > len) {
+            vector<point> nps = p;
+            point vec = ps[i+1] - ps[i];
+            double th = arg(vec);
+            rep(j, nps.size()) {
+                nps[j] *= abs(vec) / abs(p[n-1] - p[0]);
+                nps[j] = rotate(nps[j], th);
+                nps[j] += ps[i];
+            }
+            return rec(nps, len-sum+abs(ps[i+1]-ps[i])*pow(r, d), d-1);
         }
     }
-    return point(0, 0);
+    return ps[n-1];
 }
 
 void solve() {
+    vector<point> tp;
     cin >> n;
-    p.clear();
     rep(i, n) {
         double x, y;
         cin >> x >> y;
-        p.pb(point(x, y));
+        tp.pb(point(x, y));
     }
-    // convert
-    double sx = p[0].real(), sy = p[0].imag();
-    sp = point(sx, sy);
-    rep(i, n) p[i] = point(p[i].real()-sx, p[i].imag()-sy);
-    sth = arg(p[n-1]);
-    rep(i, n) p[i] = rotate(p[i], -sth);
-    
-    rep(i, n-1) len[i] = abs(p[i+1]-p[i]);
-    slen[0] = len[0];
-    rep(i, n-2) slen[i+1] = slen[i] + len[i+1];
-    
+
+    int d;
+    double f;
     cin >> d >> f;
-    point ans = rec(0, f * slen[n-2]);
-    ans = rotate(ans, sth);
-    cout << ans.real() + sx << " " << ans.imag() + sy << endl;
+    double sum = 0;
+    rep(i, n-1) sum += abs(tp[i+1] - tp[i]);
+    
+    double len = abs(tp[n-1] - tp[0]);
+    r = sum / len;
+    double th = arg(tp[n-1] - tp[0]);
+
+    p.clear();
+    rep(i, n) {
+        point tmp = tp[i] - tp[0];
+        tmp = rotate(tmp, -th);
+        tmp /= len;
+        p.pb(tmp);
+    }
+    d--;
+    point ans = rec(tp, f * sum * pow(r, d), d);
+    printf("(%.9f,%.9f)\n", ans.real(), ans.imag());
 }
 
 int main()

@@ -31,14 +31,13 @@ using namespace std;
 typedef long long ll;
 
 const int N = 400000;
-const ll p = 9973;
-const ll mod = 1000000007;
+const ll p = 1000000007;
 
 ll powp[N] = {1};
 
 void prepare()
 {
-    repi(i, 1, N) powp[i] = powp[i - 1] * p % mod;
+    repi(i, 1, N) powp[i] = powp[i - 1] * p;
 }
 
 int len;
@@ -48,8 +47,7 @@ ll h[N];
 
 ll ha(int a, int b)
 {
-    ll ret = (h[b] - h[a] * powp[b - a]) % mod;
-    return ret < 0 ? ret + mod : ret;
+    return h[b] - h[a] * powp[b - a];
 }
 
 int paren[N];
@@ -98,7 +96,7 @@ void dfs(int& pos)
 void solve()
 {
     rep(i, len) {
-        h[i + 1] = (h[i] * p + line[i]) % mod;
+        h[i + 1] = h[i] * p + line[i];
     }
     memset(paren, -1, sizeof(paren));
     stack<int> stk;

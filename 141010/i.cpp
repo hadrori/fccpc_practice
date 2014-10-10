@@ -29,62 +29,63 @@ using namespace std;
 #define mp make_pair
 
 typedef long long ll;
-typedef complex<double> point;
+typedef pair<ll, ll> pii;
 
-point o;
-
-struct cmp
+bool side(pii p, pii q, pii r)
 {
-    bool operator()(const pair<point, int>& p, const pair<point, int>& q) {
-        point a = p.first, b = q.first;
-        return arg(a - o) < arg(b - o);
-    }
-};
+    ll a = q.first - p.first;
+    ll b = q.second - p.second;
+    ll c = r.first - p.first;
+    ll d = r.second - p.second;
+    return a * d - b * c >= 0;
+}
 
-struct cmp1
+bool side1(pii p, pii q, pii r)
 {
-    bool operator()(const pair<point, int>& p, const pair<point, int>& q) {
-        point a = p.first, b = q.first;
-        return abs(a - o) < abs(b - o);
-    }
-};
+    ll a = q.first - p.first;
+    ll b = q.second - p.second;
+    ll c = r.first - p.first;
+    ll d = r.second - p.second;
+    return a * d - b * c > 0;
+}
 
-struct cmp2
+int n;
+vector<pair<pii, int> > v;
+
+void solve()
 {
-    bool operator()(const pair<point, int>& p, const pair<point, int>& q) {
-        point a = p.first, b = q.first;
-        return abs(a - o) > abs(b - o);
-    }
-};
-
-void solve() {
-    int n;
     cin >> n;
-    vector<point> v;
+    v.clear();
     rep(i, n) {
-        double x, y;
+        ll x, y;
         cin >> x >> y;
-        v.pb(point(x, y));
+        v.pb(mp(mp(x, y), i));
     }
-    o = v[0];
-    vector<pair<point, int> > u;
-    repi(i, 1, n) {
-        u.pb(mp(v[i], i));
+    sort(all(v));
+
+    vector<int> up, dn;
+    repi(i, 1, n - 1) {
+        if (side(v[0].first, v.back().first, v[i].first)) {
+            up.pb(v[i].second);
+        } else {
+            dn.pb(v[i].second);
+        }
     }
-    sort(all(u), cmp());
-    int tmp = 0;
-    const double eps = 1e-8;
-    while (tmp < n - 2 and abs(arg(u[tmp].first) - arg(u[tmp+1].first)) < eps) {
-        ++tmp;
+    if ((int) up.size() == n - 2) {
+        up.clear(), dn.clear();
+    repi(i, 1, n - 1) {
+        if (side1(v[0].first, v.back().first, v[i].first)) {
+            up.pb(v[i].second);
+        } else {
+            dn.pb(v[i].second);
+        }
     }
-    sort(u.begin(), u.begin() + tmp + 1, cmp1());
-    tmp = n - 2;
-    while (tmp >= 1 and abs(arg(u[tmp].first) - arg(u[tmp-1].first)) < eps) {
-        --tmp;
     }
-    sort(u.begin() + tmp, u.end(), cmp2());
-    rep(i, n - 1) cout << u[i].second << ' ';
-    cout << 0 << endl;
+    reverse(all(dn));
+    rep(i, up.size()) cout << up[i] << ' ';
+    cout << v.back().second << ' ';
+    rep(i, dn.size()) cout << dn[i] << ' ';
+    cout << v[0].second << endl;
 }
 
 int main()
