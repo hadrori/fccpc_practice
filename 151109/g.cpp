@@ -42,15 +42,15 @@ void solve() {
         
         rep(i, n+1) llim[i] = 0;
         rep(i, n+1) rlim[i] = n;
-        const int r = 0;
         // renew nxt
-        rep(i, n) repi(j, i+1, n+1) {
+        rep(l, n+1) rep(i, n-l+1) {
+            int j = l + i;
             repi(k, max(i, llim[i]), min(rlim[j], j)+1) {
                 if (dp[nxt][i][j] > dp[now][i][k] + dp[now][k][j]) {
                     //cout << i << " " << j << " " << k << endl;
                     dp[nxt][i][j] = dp[now][i][k] + dp[now][k][j];
-                    rlim[j] = min(rlim[j], k+r);
-                    llim[i] = max(llim[i], k-r);
+                    //rlim[j] = min(rlim[j], k);
+                    llim[i] = max(llim[i], k);
                 }
             }
         }
@@ -61,13 +61,14 @@ void solve() {
             rep(i, n) rep(j, n+1) dp[nmine][i][j] = inf;
             
             // renew mine
-            rep(i, n) repi(j, i+1, n+1) {
+            rep(l, n+1) rep(i, n-l+1) {
+                int j = l + i;
                 repi(k, max(i, llim[i]), min(rlim[j], j)+1) {
                     if (dp[nmine][i][j] > dp[mine][i][k] + dp[now][k][j]) {
                         dp[nmine][i][j] = dp[mine][i][k] + dp[now][k][j];
                         //cout << i << " " << j << " " << k << " " << dp[mine][i][k] << " " << dp[now][k][j] << " " << dp[nmine][i][j] << endl;
-                        rlim[j] = min(rlim[j], k+r);
-                        llim[i] = max(llim[i], k-r);
+                        //rlim[j] = min(rlim[j], k);
+                        llim[i] = max(llim[i], k);
                     }
                 }
             }            
