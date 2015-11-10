@@ -21,7 +21,6 @@ vector<int> unzipx, unzipy;
 
 class Bit {
     int n, sz;
-    map<int, int> zip;
     vector<int> unzip;
     vector<int> dat;
 public:
@@ -30,16 +29,15 @@ public:
         unzip.pb(-10000000);
         sort(all(unzip));        
         uniq(unzip);
-        rep(i, unzip.size()) zip[unzip[i]] = i;
+
         n = unzip.size() + 2;        
         dat.assign(n, 0);        
         sz = 0;
     }
 
     void add(int k_) {
-        //assert(zip.find(k_) != zip.end());
         sz++;
-        int k = zip[k_];
+        int k = lower_bound(all(unzip), k_) - unzip.begin();
         while(k <= n) {
             dat[k]++;
             k += k&-k;
@@ -47,10 +45,8 @@ public:
     }
 
     int sum(int k_) {
-        assert(zip.find(k_) != zip.end());
-        int k = zip[k_];        
-        if(k == 0) return 0;
-        k--;
+        //assert(zip.find(k_) != zip.end());        
+        int k = lower_bound(all(unzip), k_) - unzip.begin();        
         int ret = 0;
         while(k) {
             ret += dat[k];
@@ -69,7 +65,12 @@ class Segtree {
 
     int query(int a, int b, int k, int l, int r, int y) {
         if (r <= a or b <= l) return 0;
-        if (a <= l and r <= b) return dat[k].size() - dat[k].sum(y);
+        if (a <= l and r <= b) {
+            int ret = dat[k].size() - dat[k].sum(y-1);
+            cout << a << " " << b << " " << k << " " << l << " " << r << " " << y << " " << ret << endl;
+            cout << " " << dat[k].size() << " " << dat[k].sum(y-1) << endl;
+            return ret;
+        }
         
         int m = (l + r) / 2;
         return query(a, b, k*2+1, l, m, y) + query(a, b, 2*k+2, m, r, y);
@@ -103,9 +104,11 @@ public:
     void add(int x, int y) {
         x += n-1;
         while (x) {            
+            //cout << "ADD: "<< x << " " << y << endl;
             dat[x].add(y);
             x = (x-1) / 2;
         }
+        //cout << "ADD: "<< x << " " << y << endl;
         dat[x].add(y);
     }
 };
@@ -144,7 +147,8 @@ void input() {
     Segtree seg(rv);
 
     rep(i, n) {
-        cout << "A " << i << endl;
+        cout << "query: " << rv[i].type << " " << rv[i].x << " " << rv[i].y << endl;
+        cout << unzipx[rv[i].x] << " " << unzipy[rv[i].y] << endl;
         if (rv[i].type == 1) {
             cout << seg.query(rv[i].x, rv[i].y) << endl;
         } else {

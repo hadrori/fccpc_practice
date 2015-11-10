@@ -21,14 +21,13 @@ void input() {
         ps.emplace_back(x[i], y[i]);
     }
     sort(all(ps));
-    for(auto p: ps)cerr<<p.first<<','<<p.second<<' ';cerr<<endl;
 }
 
 struct node {
     int a, b;
     node *l, *r;
     vector<int> ys, bit;
-    node(int a, int b) : a(a), b(b) {}
+    node(int a, int b) : a(a), b(b), l(NULL), r(NULL) {}
 };
 inline int minx(node *v) { return ps[v->a].first; }
 inline int maxx(node *v) { return ps[v->b - 1].first; }
@@ -57,7 +56,7 @@ void insert(node *v, int x, int y) {
     if (mp(x, y) < ps[v->a]) return;
     if (mp(x, y) > ps[v->b - 1]) return;
     int k = lower_bound(all(v->ys), y) - v->ys.begin();
-    for (++k; k < int(v->bit.size()); k += k & -k) {
+    for (++k; k <= int(v->bit.size()); k += k & -k) {
         ++v->bit[k-1];
     }
     insert(v->l, x, y);
