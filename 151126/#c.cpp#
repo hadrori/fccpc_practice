@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) repi(i,0,n)
+#define repi(i,a,b) for(int i=(int)(a);i<(int)(b);i++)
+#define all(u) begin(u),end(u)
+#define pb push_back
+#define mp make_pair
+#define long int64_t
+
+const int N = 1024;
+
+int n, a[N];
+char c[N];
+
+void input() {
+  cin >> n;
+  rep(i, n) cin >> c[i] >> a[i];
+}
+
+int dp[N];
+
+void solve() {
+  fill_n(dp, N, 1024);
+  dp[0] = 0;
+  for (int i = 1; i <= n; ++i) {
+    int& ret = dp[i];
+    if (c[i-1] == 'n') {
+      dp[i] = dp[i-1];
+    } else {
+      dp[i] = dp[i-1] + 1;
+      int max_n = -1;
+      int min_y = a[i-1];
+      for (int j = i-1; j >= 0; --j) {
+	if (c[j] == 'n') {
+      }
+    }
+  }
+  rep(i, n) {
+    int& ret = dp[i+1];
+    if (c[i] == 'n') {
+      ret = dp[i];
+    } else {
+      ret = dp[i] + 1;
+      int max_n = -1;
+      int min_y = a[i];
+      for (int j = i-1; j >= 0; --j) {
+	if (c[j] == 'n') {
+	  max_n = max(max_n, a[j]);
+	} else {
+	  min_y = min(min_y, a[j]);
+	}
+	if (max_n >= min_y) break;
+	ret = min(ret, dp[j] + 1);
+      }
+    }
+  }
+  cout << dp[n] << endl;
+}
+
+int main() {
+  cin.tie(0);
+  ios_base::sync_with_stdio(false);
+  input();
+  solve();
+  return 0;
+}
